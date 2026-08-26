@@ -79,16 +79,20 @@ if (process.env.VERCEL !== "1" && !process.env.NOW_BUILD) {
   });
 }
 
-const DBURL = process.env.DB_URL || "mongodb://127.0.0.1:27017/youtube";
-mongoose
-  .connect(DBURL)
-  .then(async () => {
-    console.log("Mongodb connected to:", DBURL);
-    await seedSampleVideos();
-  })
-  .catch((error) => {
-    console.log("MongoDB connection note:", error.message || error);
-    console.log("Server is running. Provide a valid DB_URL in server/.env if using MongoDB Atlas.");
-  });
+const DBURL = process.env.DB_URL || (process.env.VERCEL ? null : "mongodb://127.0.0.1:27017/youtube");
+
+if (DBURL) {
+  mongoose
+    .connect(DBURL, { serverSelectionTimeoutMS: 3000 })
+    .then(async () => {
+      console.log("Mongodb connected to:", DBURL);
+      await seedSampleVideos();
+    })
+    .catch((error) => {
+      console.log("MongoDB connection note:", error.message || error);
+    });
+} else {
+  console.log("No MongoDB Atlas DB_URL set. Running in demo mode with sample videos.");
+}
 
 export default app;
