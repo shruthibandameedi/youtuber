@@ -73,9 +73,11 @@ server.on("error", (error) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`server running on port ${PORT}`);
-});
+if (process.env.VERCEL !== "1" && !process.env.NOW_BUILD) {
+  server.listen(PORT, () => {
+    console.log(`server running on port ${PORT}`);
+  });
+}
 
 const DBURL = process.env.DB_URL || "mongodb://127.0.0.1:27017/youtube";
 mongoose
@@ -88,3 +90,5 @@ mongoose
     console.log("MongoDB connection note:", error.message || error);
     console.log("Server is running. Provide a valid DB_URL in server/.env if using MongoDB Atlas.");
   });
+
+export default app;
